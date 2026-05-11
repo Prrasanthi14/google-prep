@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Google Prep — Learning Journal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0c0c0e;
+  --bg2: #141416;
+  --bg3: #1c1c20;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #e8e6e0;
+  --text2: #8a8880;
+  --text3: #555350;
+  --accent: #f5a623;
+  --accent2: #e8593c;
+  --green: #4ade80;
+  --blue: #60a5fa;
+  --purple: #a78bfa;
+  --red: #f87171;
+  --font-serif: 'DM Serif Display', serif;
+  --font-sans: 'Instrument Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Grid background */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+/* Glow blob */
+body::after {
+  content: '';
+  position: fixed; top: -200px; right: -200px; z-index: 0;
+  width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(245,166,35,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.container { max-width: 860px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+/* Header */
+header {
+  padding: 64px 0 40px;
+  border-bottom: 1px solid var(--border);
+}
+.header-inner { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.header-left {}
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 12px;
+}
+h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(36px, 6vw, 56px);
+  line-height: 1.1;
+  color: var(--text);
+}
+h1 em { font-style: italic; color: var(--accent); }
+.subtitle { color: var(--text2); font-size: 14px; margin-top: 10px; max-width: 480px; }
+.header-stats { display: flex; gap: 32px; flex-shrink: 0; }
+.hstat { text-align: right; }
+.hstat-val { font-family: var(--font-serif); font-size: 36px; color: var(--text); line-height: 1; }
+.hstat-lbl { font-size: 11px; color: var(--text3); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+
+/* Nav */
+nav {
+  display: flex; gap: 0; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(12,12,14,0.92);
+  backdrop-filter: blur(12px);
+}
+nav button {
+  padding: 14px 20px; background: none; border: none;
+  font-family: var(--font-sans); font-size: 13px;
+  color: var(--text3); cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+nav button:hover { color: var(--text2); }
+nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* Sections */
+section { padding: 40px 0; border-bottom: 1px solid var(--border); display: none; }
+section.visible { display: block; }
+
+/* Section title */
+.section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 28px; gap: 16px; flex-wrap: wrap; }
+.section-title { font-family: var(--font-serif); font-size: 26px; }
+.section-meta { font-size: 12px; color: var(--text3); font-family: var(--font-mono); }
+
+/* Cards */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+.card:hover { border-color: var(--border2); }
+
+/* Streak grid */
+.streak-section {}
+.streak-year { font-size: 11px; color: var(--text3); font-family: var(--font-mono); margin-bottom: 8px; }
+.streak-grid { display: flex; gap: 3px; flex-wrap: wrap; }
+.streak-cell {
+  width: 13px; height: 13px; border-radius: 3px;
+  background: var(--bg3); cursor: default;
+  transition: transform 0.1s;
+  position: relative;
+}
+.streak-cell:hover { transform: scale(1.3); z-index: 10; }
+.streak-cell.level-1 { background: rgba(245,166,35,0.25); }
+.streak-cell.level-2 { background: rgba(245,166,35,0.5); }
+.streak-cell.level-3 { background: rgba(245,166,35,0.75); }
+.streak-cell.level-4 { background: #f5a623; }
+.streak-cell.today { outline: 1.5px solid var(--accent); outline-offset: 1px; }
+.streak-legend { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
+.streak-legend span { font-size: 11px; color: var(--text3); font-family: var(--font-mono); }
+
+/* Problem log */
+.problem-filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.filter-btn {
+  padding: 5px 12px; border-radius: 20px;
+  border: 1px solid var(--border2); background: none;
+  font-size: 12px; font-family: var(--font-sans);
+  color: var(--text2); cursor: pointer; transition: all 0.15s;
+}
+.filter-btn.active, .filter-btn:hover { background: var(--accent); border-color: var(--accent); color: #000; }
+
+.problem-row {
+  display: grid; grid-template-columns: 1fr auto auto auto;
+  gap: 12px; align-items: center;
+  padding: 14px 20px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 10px; margin-bottom: 8px;
+  transition: border-color 0.2s;
+}
+.problem-row:hover { border-color: var(--border2); }
+.problem-name { font-size: 14px; font-weight: 500; }
+.problem-topic { font-size: 11px; color: var(--text3); font-family: var(--font-mono); margin-top: 2px; }
+.difficulty { font-size: 11px; padding: 3px 8px; border-radius: 12px; font-family: var(--font-mono); font-weight: 500; }
+.diff-easy { background: rgba(74,222,128,0.12); color: var(--green); }
+.diff-medium { background: rgba(245,166,35,0.12); color: var(--accent); }
+.diff-hard { background: rgba(248,113,113,0.12); color: var(--red); }
+.problem-date { font-size: 11px; color: var(--text3); font-family: var(--font-mono); }
+
+/* Concepts */
+.concept-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.concept-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 18px 20px;
+  transition: border-color 0.2s;
+}
+.concept-card:hover { border-color: var(--border2); }
+.concept-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.concept-name { font-size: 14px; font-weight: 600; }
+.concept-status { font-size: 11px; font-family: var(--font-mono); padding: 2px 8px; border-radius: 10px; }
+.status-learning { background: rgba(245,166,35,0.12); color: var(--accent); }
+.status-done { background: rgba(74,222,128,0.12); color: var(--green); }
+.status-todo { background: rgba(255,255,255,0.05); color: var(--text3); }
+.concept-bar-track { height: 3px; background: var(--bg3); border-radius: 2px; }
+.concept-bar-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.6s ease; }
+.concept-meta { font-size: 11px; color: var(--text3); margin-top: 8px; font-family: var(--font-mono); }
+.concept-tag { font-size: 10px; padding: 2px 6px; border-radius: 6px; background: rgba(255,255,255,0.05); color: var(--text3); margin-right: 4px; }
+
+/* Interview journal */
+.journal-entry {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; margin-bottom: 16px;
+  overflow: hidden; transition: border-color 0.2s;
+}
+.journal-entry:hover { border-color: var(--border2); }
+.journal-header {
+  padding: 16px 20px; cursor: pointer;
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+}
+.journal-q { font-size: 14px; font-weight: 500; flex: 1; }
+.journal-score {
+  font-family: var(--font-mono); font-size: 13px; font-weight: 500;
+  flex-shrink: 0; display: flex; align-items: center; gap: 6px;
+}
+.score-pill { padding: 3px 10px; border-radius: 12px; font-size: 12px; }
+.score-a { background: rgba(74,222,128,0.12); color: var(--green); }
+.score-b { background: rgba(96,165,250,0.12); color: var(--blue); }
+.score-c { background: rgba(245,166,35,0.12); color: var(--accent); }
+.score-d { background: rgba(248,113,113,0.12); color: var(--red); }
+.journal-body { padding: 0 20px 20px; border-top: 1px solid var(--border); display: none; }
+.journal-body.open { display: block; }
+.journal-section-lbl { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin: 14px 0 6px; }
+.journal-answer {
+  background: var(--bg3); border-radius: 8px; padding: 12px 14px;
+  font-size: 13px; line-height: 1.6; color: var(--text2);
+}
+.journal-eval {
+  font-size: 13px; line-height: 1.6; color: var(--text2);
+  border-left: 2px solid var(--accent); padding-left: 12px; margin-top: 4px;
+}
+.journal-date { font-size: 11px; color: var(--text3); font-family: var(--font-mono); margin-top: 8px; }
+
+/* Add entry form */
+.add-form {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: 12px; padding: 24px; margin-bottom: 24px;
+}
+.add-form h3 { font-family: var(--font-serif); font-size: 18px; margin-bottom: 16px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 11px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); }
+.form-group input, .form-group select, .form-group textarea {
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 9px 12px;
+  color: var(--text); font-family: var(--font-sans); font-size: 13px;
+  outline: none; transition: border-color 0.15s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color: var(--accent);
+}
+.form-group textarea { resize: vertical; min-height: 72px; }
+.form-group select option { background: var(--bg3); }
+.btn-primary {
+  background: var(--accent); color: #000; border: none;
+  border-radius: 8px; padding: 10px 20px;
+  font-family: var(--font-sans); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: opacity 0.15s;
+}
+.btn-primary:hover { opacity: 0.85; }
+.btn-ghost {
+  background: none; color: var(--text2); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 10px 20px;
+  font-family: var(--font-sans); font-size: 13px;
+  cursor: pointer; transition: border-color 0.15s;
+  margin-left: 8px;
+}
+.btn-ghost:hover { border-color: var(--border2); color: var(--text); }
+
+.empty-state { text-align: center; padding: 48px 24px; color: var(--text3); font-size: 14px; }
+.empty-state .icon { font-size: 36px; margin-bottom: 12px; }
+
+/* Reflection section */
+.reflection-card {
+  background: var(--bg2); border-left: 3px solid var(--purple);
+  border-radius: 0 12px 12px 0; padding: 18px 20px; margin-bottom: 12px;
+}
+.reflection-date { font-size: 11px; color: var(--text3); font-family: var(--font-mono); margin-bottom: 6px; }
+.reflection-topic { font-size: 13px; font-weight: 600; color: var(--purple); margin-bottom: 8px; }
+.reflection-text { font-size: 14px; color: var(--text2); line-height: 1.7; }
+
+/* Footer */
+footer { padding: 32px 0; text-align: center; }
+.footer-text { font-size: 12px; color: var(--text3); font-family: var(--font-mono); }
+.footer-text a { color: var(--accent); text-decoration: none; }
+
+/* Tooltip */
+.tooltip {
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 6px; padding: 4px 8px; font-size: 11px;
+  color: var(--text2); white-space: nowrap; pointer-events: none;
+  font-family: var(--font-mono);
+}
+
+@media (max-width: 600px) {
+  .form-row { grid-template-columns: 1fr; }
+  .header-stats { gap: 20px; }
+  .problem-row { grid-template-columns: 1fr auto; }
+  .problem-row .problem-date { display: none; }
+}
+
+/* Animations */
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+section.visible .card, section.visible .concept-card, section.visible .journal-entry,
+section.visible .problem-row, section.visible .reflection-card {
+  animation: fadeUp 0.3s ease both;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="header-inner">
+      <div class="header-left">
+        <div class="eyebrow">🎯 Google SWE Prep Journal</div>
+        <h1>Learning in<br/><em>public.</em></h1>
+        <p class="subtitle">Tracking every problem, concept, and interview question — raw, honest, and improving every day.</p>
+      </div>
+      <div class="header-stats">
+        <div class="hstat">
+          <div class="hstat-val" id="stat-days">0</div>
+          <div class="hstat-lbl">Day streak</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-val" id="stat-problems">0</div>
+          <div class="hstat-lbl">Problems</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-val" id="stat-entries">0</div>
+          <div class="hstat-lbl">Sessions</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <button class="active" onclick="showTab('streak')">📅 Streak</button>
+    <button onclick="showTab('problems')">⚡ Problems</button>
+    <button onclick="showTab('concepts')">🧠 Concepts</button>
+    <button onclick="showTab('journal')">🎤 Interview log</button>
+    <button onclick="showTab('reflections')">💭 Reflections</button>
+  </nav>
+
+  <!-- STREAK -->
+  <section id="tab-streak" class="visible">
+    <div class="section-head">
+      <div class="section-title">Consistency</div>
+      <div class="section-meta" id="streak-meta">Loading…</div>
+    </div>
+    <div class="streak-year">Last 24 weeks</div>
+    <div class="streak-grid" id="streak-grid"></div>
+    <div class="streak-legend" style="margin-top:12px">
+      <span>Less</span>
+      <div class="streak-cell"></div>
+      <div class="streak-cell level-1"></div>
+      <div class="streak-cell level-2"></div>
+      <div class="streak-cell level-3"></div>
+      <div class="streak-cell level-4"></div>
+      <span>More</span>
+    </div>
+
+    <div style="margin-top:32px">
+      <div class="section-head"><div class="section-title" style="font-size:18px">Log today's session</div></div>
+      <div class="add-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Topic studied</label>
+            <input type="text" id="session-topic" placeholder="e.g. Binary Search, HashMap internals"/>
+          </div>
+          <div class="form-group">
+            <label>Duration (mins)</label>
+            <input type="number" id="session-duration" placeholder="25" min="1" max="480"/>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label>What did you cover?</label>
+          <textarea id="session-notes" placeholder="Quick summary — even 1 line is fine."></textarea>
+        </div>
+        <button class="btn-primary" onclick="logSession()">Log session ↗</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEMS -->
+  <section id="tab-problems">
+    <div class="section-head">
+      <div class="section-title">Problems solved</div>
+      <div class="section-meta" id="problems-meta">0 total</div>
+    </div>
+
+    <div class="add-form">
+      <h3>Add a problem</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Problem name</label>
+          <input type="text" id="prob-name" placeholder="e.g. Two Sum"/>
+        </div>
+        <div class="form-group">
+          <label>Topic / tag</label>
+          <input type="text" id="prob-topic" placeholder="e.g. Arrays, HashMap"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Difficulty</label>
+          <select id="prob-diff">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Time taken (mins)</label>
+          <input type="number" id="prob-time" placeholder="20" min="1"/>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label>Key insight / what you learned</label>
+        <textarea id="prob-insight" placeholder="One thing you'll remember about this problem…"></textarea>
+      </div>
+      <button class="btn-primary" onclick="addProblem()">Add problem ↗</button>
+    </div>
+
+    <div class="problem-filters">
+      <button class="filter-btn active" onclick="filterProblems('all',this)">All</button>
+      <button class="filter-btn" onclick="filterProblems('easy',this)">Easy</button>
+      <button class="filter-btn" onclick="filterProblems('medium',this)">Medium</button>
+      <button class="filter-btn" onclick="filterProblems('hard',this)">Hard</button>
+    </div>
+    <div id="problem-list"></div>
+  </section>
+
+  <!-- CONCEPTS -->
+  <section id="tab-concepts">
+    <div class="section-head">
+      <div class="section-title">Concepts mastered</div>
+      <div class="section-meta" id="concepts-meta">Track your DSA → System Design journey</div>
+    </div>
+    <div class="concept-grid" id="concept-grid"></div>
+  </section>
+
+  <!-- INTERVIEW JOURNAL -->
+  <section id="tab-journal">
+    <div class="section-head">
+      <div class="section-title">Interview log</div>
+      <div class="section-meta">Raw Q&A sessions — indexed for growth</div>
+    </div>
+    <div class="add-form">
+      <h3>Log an interview Q&A</h3>
+      <div class="form-group" style="margin-bottom:12px">
+        <label>Question asked</label>
+        <input type="text" id="iq-question" placeholder="e.g. Explain how HashMap works internally in Java"/>
+      </div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label>Your answer (what you said)</label>
+        <textarea id="iq-answer" placeholder="Write it exactly as you answered — no polishing."></textarea>
+      </div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label>Feedback / correction (from Claude or interviewer)</label>
+        <textarea id="iq-feedback" placeholder="What was missing, what was right, what would score better…"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Topic</label>
+          <input type="text" id="iq-topic" placeholder="e.g. Java internals, DSA"/>
+        </div>
+        <div class="form-group">
+          <label>Score</label>
+          <select id="iq-score">
+            <option value="A">A — Nailed it</option>
+            <option value="B" selected>B — Good, minor gaps</option>
+            <option value="C">C — Partial, need more work</option>
+            <option value="D">D — Missed the point</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="addJournalEntry()">Log entry ↗</button>
+    </div>
+    <div id="journal-list"></div>
+  </section>
+
+  <!-- REFLECTIONS -->
+  <section id="tab-reflections">
+    <div class="section-head">
+      <div class="section-title">Reflections</div>
+      <div class="section-meta">What clicked, what confused you, what surprised you</div>
+    </div>
+    <div class="add-form">
+      <h3>Add a reflection</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Topic</label>
+          <input type="text" id="ref-topic" placeholder="e.g. Recursion, System Design basics"/>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label>Your reflection</label>
+        <textarea id="ref-text" style="min-height:100px" placeholder="What clicked today? What are you still confused about? What surprised you? Write freely."></textarea>
+      </div>
+      <button class="btn-primary" onclick="addReflection()">Save reflection ↗</button>
+    </div>
+    <div id="reflection-list"></div>
+  </section>
+
+  <footer>
+    <div class="footer-text">
+      Built with Claude · Data lives in your browser ·
+      <a href="#" onclick="exportData()">Export JSON</a> ·
+      <a href="https://github.com" target="_blank">GitHub Pages →</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+// ─── Data layer (localStorage) ───────────────────────────────────────────
+const STORE = 'google_prep_v1';
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(STORE)) || defaultData(); }
+  catch { return defaultData(); }
+}
+
+function save(data) {
+  localStorage.setItem(STORE, JSON.stringify(data));
+}
+
+function defaultData() {
+  return {
+    sessions: [],    // { date, topic, duration, notes }
+    problems: [],    // { id, name, topic, difficulty, time, insight, date }
+    journal: [],     // { id, question, answer, feedback, topic, score, date }
+    reflections: [], // { id, topic, text, date }
+    concepts: defaultConcepts()
+  };
+}
+
+function defaultConcepts() {
+  return [
+    { name:'Arrays & Strings', category:'DSA', status:'todo', progress:0, sessions:0 },
+    { name:'HashMaps & Sets', category:'DSA', status:'todo', progress:0, sessions:0 },
+    { name:'Linked Lists', category:'DSA', status:'todo', progress:0, sessions:0 },
+    { name:'Stacks & Queues', category:'DSA', status:'todo', progress:0, sessions:0 },
+    { name:'Binary Search', category:'DSA', status:'todo', progress:0, sessions:0 },
+    { name:'Trees & BST', category:'DSA', status:'todo', progress:0, sessions:0 },
+    { name:'Graphs & BFS/DFS', category:'DSA', status:'todo', progress:0, sessions:0 },
+    { name:'Dynamic Programming', category:'DSA', status:'todo', progress:0, sessions:0 },
+    { name:'Recursion', category:'DSA', status:'todo', progress:0, sessions:0 },
+    { name:'Two Pointers', category:'DSA', status:'todo', progress:0, sessions:0 },
+    { name:'Sliding Window', category:'DSA', status:'todo', progress:0, sessions:0 },
+    { name:'Sorting algorithms', category:'DSA', status:'todo', progress:0, sessions:0 },
+    { name:'OOP & SOLID', category:'LLD', status:'todo', progress:0, sessions:0 },
+    { name:'Design patterns (5 core)', category:'LLD', status:'todo', progress:0, sessions:0 },
+    { name:'LLD: Parking lot / LRU cache', category:'LLD', status:'todo', progress:0, sessions:0 },
+    { name:'Scalability basics', category:'System Design', status:'todo', progress:0, sessions:0 },
+    { name:'SQL vs NoSQL', category:'System Design', status:'todo', progress:0, sessions:0 },
+    { name:'Load balancing & caching', category:'System Design', status:'todo', progress:0, sessions:0 },
+    { name:'HLD: Design URL shortener', category:'System Design', status:'todo', progress:0, sessions:0 },
+    { name:'Microservices & APIs', category:'System Design', status:'todo', progress:0, sessions:0 },
+  ];
+}
+
+// ─── Tab navigation ───────────────────────────────────────────────────────
+function showTab(id) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('visible'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('visible');
+  event.target.classList.add('active');
+  renderAll();
+}
+
+// ─── Streak grid ──────────────────────────────────────────────────────────
+function renderStreak(data) {
+  const grid = document.getElementById('streak-grid');
+  grid.innerHTML = '';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const days = 24*7;
+
+  // Count sessions per date
+  const counts = {};
+  data.sessions.forEach(s => { counts[s.date] = (counts[s.date]||0)+1; });
+
+  let streak = 0, currentStreak = true;
+  for (let i = days-1; i >= 0; i--) {
+    const d = new Date(today); d.setDate(d.getDate()-i);
+    const key = d.toISOString().slice(0,10);
+    const cnt = counts[key]||0;
+    const cell = document.createElement('div');
+    cell.className = 'streak-cell';
+    if (cnt > 0) cell.classList.add('level-'+Math.min(cnt,4));
+    if (i === 0) cell.classList.add('today');
+    cell.title = key + (cnt ? ' · '+cnt+' session'+(cnt>1?'s':'') : '');
+    grid.appendChild(cell);
+    if (i < 30) {
+      if (currentStreak && cnt > 0) streak++;
+      else if (i > 0) currentStreak = false;
+    }
+  }
+
+  document.getElementById('stat-days').textContent = streak;
+  document.getElementById('streak-meta').textContent = streak + ' day streak · ' + data.sessions.length + ' total sessions';
+}
+
+// ─── Log session ──────────────────────────────────────────────────────────
+function logSession() {
+  const topic = document.getElementById('session-topic').value.trim();
+  const duration = document.getElementById('session-duration').value.trim();
+  const notes = document.getElementById('session-notes').value.trim();
+  if (!topic) { alert('Add a topic first!'); return; }
+  const data = load();
+  const today = new Date().toISOString().slice(0,10);
+  data.sessions.push({ date: today, topic, duration: duration||'?', notes });
+
+  // Auto-update concept progress
+  data.concepts.forEach(c => {
+    if (topic.toLowerCase().includes(c.name.toLowerCase().split(' ')[0].toLowerCase())) {
+      c.sessions = (c.sessions||0)+1;
+      c.progress = Math.min(100, c.progress + 20);
+      c.status = c.progress >= 100 ? 'done' : 'learning';
+    }
+  });
+  save(data);
+  document.getElementById('session-topic').value='';
+  document.getElementById('session-duration').value='';
+  document.getElementById('session-notes').value='';
+  renderAll();
+}
+
+// ─── Problems ──────────────────────────────────────────────────────────────
+function addProblem() {
+  const name = document.getElementById('prob-name').value.trim();
+  if (!name) { alert('Enter a problem name!'); return; }
+  const data = load();
+  data.problems.push({
+    id: Date.now(),
+    name,
+    topic: document.getElementById('prob-topic').value.trim()||'General',
+    difficulty: document.getElementById('prob-diff').value,
+    time: document.getElementById('prob-time').value||'?',
+    insight: document.getElementById('prob-insight').value.trim(),
+    date: new Date().toISOString().slice(0,10)
+  });
+  save(data);
+  ['prob-name','prob-topic','prob-time','prob-insight'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('prob-diff').value='medium';
+  renderAll();
+}
+
+let currentFilter = 'all';
+function filterProblems(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProblems(load());
+}
+
+function renderProblems(data) {
+  const list = document.getElementById('problem-list');
+  let probs = data.problems;
+  if (currentFilter !== 'all') probs = probs.filter(p => p.difficulty === currentFilter);
+  document.getElementById('problems-meta').textContent = data.problems.length + ' total · ' + data.problems.filter(p=>p.difficulty==='hard').length + ' hard';
+  document.getElementById('stat-problems').textContent = data.problems.length;
+  if (!probs.length) { list.innerHTML = '<div class="empty-state"><div class="icon">⚡</div>No problems yet. Add your first one above.</div>'; return; }
+  list.innerHTML = [...probs].reverse().map(p => `
+    <div class="problem-row">
+      <div>
+        <div class="problem-name">${p.name}</div>
+        <div class="problem-topic">${p.topic}${p.insight ? ' · '+p.insight : ''}</div>
+      </div>
+      <span class="difficulty diff-${p.difficulty}">${p.difficulty}</span>
+      <span class="difficulty" style="background:rgba(255,255,255,0.05);color:var(--text3)">${p.time}m</span>
+      <span class="problem-date">${p.date}</span>
+    </div>
+  `).join('');
+}
+
+// ─── Concepts ─────────────────────────────────────────────────────────────
+function renderConcepts(data) {
+  const catColors = { DSA:'var(--accent)', LLD:'var(--green)', 'System Design':'var(--blue)' };
+  const grid = document.getElementById('concept-grid');
+  const done = data.concepts.filter(c=>c.status==='done').length;
+  const learning = data.concepts.filter(c=>c.status==='learning').length;
+  document.getElementById('concepts-meta').textContent = done+' done · '+learning+' in progress · '+data.concepts.length+' total';
+  grid.innerHTML = data.concepts.map((c,i) => `
+    <div class="concept-card" onclick="cycleConceptStatus(${i})">
+      <div class="concept-top">
+        <div class="concept-name">${c.name}</div>
+        <span class="concept-status status-${c.status}">${c.status}</span>
+      </div>
+      <div class="concept-bar-track"><div class="concept-bar-fill" style="width:${c.progress}%;background:${catColors[c.category]||'var(--accent)'}"></div></div>
+      <div class="concept-meta">
+        <span class="concept-tag">${c.category}</span>
+        ${c.sessions ? c.sessions+' session'+(c.sessions>1?'s':'') : 'Not started'}
+      </div>
+    </div>
+  `).join('');
+}
+
+function cycleConceptStatus(i) {
+  const data = load();
+  const statuses = ['todo','learning','done'];
+  const c = data.concepts[i];
+  const next = statuses[(statuses.indexOf(c.status)+1)%3];
+  c.status = next;
+  if (next==='done') c.progress=100;
+  else if (next==='learning') c.progress=Math.max(c.progress,10);
+  else c.progress=0;
+  save(data); renderConcepts(data);
+}
+
+// ─── Interview journal ────────────────────────────────────────────────────
+function addJournalEntry() {
+  const question = document.getElementById('iq-question').value.trim();
+  if (!question) { alert('Enter the question!'); return; }
+  const data = load();
+  data.journal.push({
+    id: Date.now(),
+    question,
+    answer: document.getElementById('iq-answer').value.trim(),
+    feedback: document.getElementById('iq-feedback').value.trim(),
+    topic: document.getElementById('iq-topic').value.trim()||'General',
+    score: document.getElementById('iq-score').value,
+    date: new Date().toISOString().slice(0,10)
+  });
+  save(data);
+  ['iq-question','iq-answer','iq-feedback','iq-topic'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('iq-score').value='B';
+  renderJournal(data);
+}
+
+function renderJournal(data) {
+  const list = document.getElementById('journal-list');
+  document.getElementById('stat-entries').textContent = data.journal.length;
+  if (!data.journal.length) { list.innerHTML='<div class="empty-state"><div class="icon">🎤</div>No interview Q&As yet. After each Claude session, log the questions here.</div>'; return; }
+  list.innerHTML = [...data.journal].reverse().map(e => `
+    <div class="journal-entry">
+      <div class="journal-header" onclick="this.nextElementSibling.classList.toggle('open')">
+        <div>
+          <div class="journal-q">${e.question}</div>
+          <div class="journal-date">${e.date} · ${e.topic}</div>
+        </div>
+        <span class="score-pill score-${e.score.toLowerCase()}">${e.score}</span>
+      </div>
+      <div class="journal-body">
+        <div class="journal-section-lbl">Your answer</div>
+        <div class="journal-answer">${e.answer||'(not logged)'}</div>
+        <div class="journal-section-lbl">Feedback / correction</div>
+        <div class="journal-eval">${e.feedback||'(not logged)'}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── Reflections ──────────────────────────────────────────────────────────
+function addReflection() {
+  const text = document.getElementById('ref-text').value.trim();
+  if (!text) { alert('Write something first!'); return; }
+  const data = load();
+  data.reflections.push({
+    id: Date.now(),
+    topic: document.getElementById('ref-topic').value.trim()||'General',
+    text,
+    date: new Date().toISOString().slice(0,10)
+  });
+  save(data);
+  document.getElementById('ref-topic').value='';
+  document.getElementById('ref-text').value='';
+  renderReflections(data);
+}
+
+function renderReflections(data) {
+  const list = document.getElementById('reflection-list');
+  if (!data.reflections.length) { list.innerHTML='<div class="empty-state"><div class="icon">💭</div>No reflections yet. Write your first one after today\'s session.</div>'; return; }
+  list.innerHTML = [...data.reflections].reverse().map(r => `
+    <div class="reflection-card">
+      <div class="reflection-date">${r.date}</div>
+      <div class="reflection-topic">${r.topic}</div>
+      <div class="reflection-text">${r.text}</div>
+    </div>
+  `).join('');
+}
+
+// ─── Export ───────────────────────────────────────────────────────────────
+function exportData() {
+  const data = load();
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='google-prep-data.json'; a.click();
+}
+
+// ─── Render all ───────────────────────────────────────────────────────────
+function renderAll() {
+  const data = load();
+  renderStreak(data);
+  renderProblems(data);
+  renderConcepts(data);
+  renderJournal(data);
+  renderReflections(data);
+}
+
+renderAll();
+</script>
+</body>
+</html>
